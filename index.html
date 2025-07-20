@@ -57,11 +57,6 @@
             @apply text-gray-400 border-transparent hover:text-gray-600;
         }
         
-        .floating-button {
-            @apply fixed bottom-36 right-6 z-50 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-xl w-16 h-16 flex items-center justify-center text-3xl font-bold transition-all duration-200 hover:scale-110 active:scale-95;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-        }
-        
         .input-field {
             @apply flex-1 px-4 py-3 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-lg bg-blue-50 placeholder-gray-400;
         }
@@ -79,7 +74,19 @@
         }
         
         .priority-btn.selected {
-            @apply border-blue-500 bg-blue-50 text-blue-700 shadow-md;
+            @apply shadow-md;
+        }
+        
+        .priority-btn[data-priority="low"].selected {
+            @apply border-green-500 bg-green-50 text-green-700;
+        }
+        
+        .priority-btn[data-priority="medium"].selected {
+            @apply border-yellow-500 bg-yellow-50 text-yellow-700;
+        }
+        
+        .priority-btn[data-priority="high"].selected {
+            @apply border-red-500 bg-red-50 text-red-700;
         }
         
         /* Custom animations */
@@ -148,14 +155,6 @@
         
         /* Mobile-specific improvements */
         @media (max-width: 768px) {
-            .floating-button {
-                bottom: 8rem;
-                right: 1rem;
-                width: 4rem;
-                height: 4rem;
-                z-index: 9999;
-            }
-            
             .modal-content {
                 margin: 1rem;
                 max-height: calc(100vh - 2rem);
@@ -240,17 +239,13 @@
                 <span class="text-xl mb-0.5">🌈</span>
                 <span class="text-xs font-medium">Someday</span>
             </button>
+            <button id="addTaskBtn" class="flex flex-col items-center px-2 pt-1 pb-0.5 text-blue-600 hover:text-blue-700 transition-colors" aria-label="Add task">
+                <span class="text-2xl mb-0.5">+</span>
+                <span class="text-xs font-medium">Add</span>
+            </button>
         </nav>
 
-        <!-- Floating action button -->
-        <button id="addTaskBtn" class="floating-button" aria-label="Add task">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
-            </svg>
-        </button>
-    </div>
-
-    <!-- Add Task Modal -->
+        <!-- Add Task Modal -->
     <div id="addTaskModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20 hidden p-4">
         <div class="modal-content w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
             <form id="addTaskForm" class="space-y-4">
@@ -512,21 +507,25 @@
             
             setPriorityInModal(priority) {
                 document.querySelectorAll('.priority-btn').forEach(btn => {
-                    btn.classList.remove('selected');
+                    btn.classList.remove('selected', 'border-green-500', 'bg-green-50', 'text-green-700', 'border-yellow-500', 'bg-yellow-50', 'text-yellow-700', 'border-red-500', 'bg-red-50', 'text-red-700');
+                    btn.classList.add('border-gray-200', 'text-gray-600');
                 });
                 
                 const selectedBtn = document.querySelector(`[data-priority="${priority}"]`);
                 selectedBtn.classList.add('selected');
+                selectedBtn.classList.remove('border-gray-200', 'text-gray-600');
             }
             
             resetPriorityButtons() {
                 document.querySelectorAll('.priority-btn').forEach(btn => {
-                    btn.classList.remove('selected');
+                    btn.classList.remove('selected', 'border-green-500', 'bg-green-50', 'text-green-700', 'border-yellow-500', 'bg-yellow-50', 'text-yellow-700', 'border-red-500', 'bg-red-50', 'text-red-700');
+                    btn.classList.add('border-gray-200', 'text-gray-600');
                 });
                 
                 // Set medium as default
                 const mediumBtn = document.querySelector('[data-priority="medium"]');
                 mediumBtn.classList.add('selected');
+                mediumBtn.classList.remove('border-gray-200', 'text-gray-600');
             }
             
             renderTasks() {
