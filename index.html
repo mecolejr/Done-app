@@ -547,7 +547,6 @@
                 // Add event listeners to task items
                 taskList.querySelectorAll('.task-item').forEach(item => {
                     const taskId = parseInt(item.dataset.taskId);
-                    const task = tasks.find(t => t.id === taskId);
                     
                     // Toggle completion
                     const checkbox = item.querySelector('.task-checkbox');
@@ -555,7 +554,11 @@
                     
                     // Delete task
                     const deleteBtn = item.querySelector('.delete-task');
-                    deleteBtn.addEventListener('click', () => this.deleteTask(taskId));
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.deleteTask(taskId);
+                    });
                 });
             }
             
@@ -614,7 +617,13 @@
             }
             
             deleteTask(taskId) {
+                console.log('Deleting task with ID:', taskId);
+                console.log('Current tasks:', this.tasks[this.activeTab]);
+                
                 this.tasks[this.activeTab] = this.tasks[this.activeTab].filter(t => t.id !== taskId);
+                
+                console.log('Tasks after deletion:', this.tasks[this.activeTab]);
+                
                 this.saveTasks();
                 this.renderTasks();
                 this.updateTaskCount();
@@ -691,7 +700,7 @@
             }
             
             generateId() {
-                return Date.now() + Math.random();
+                return Math.floor(Date.now() + Math.random() * 1000);
             }
             
             saveTasks() {
