@@ -1,7 +1,7 @@
 {
-  "name": "soulful-todo-app",
+  "name": "done-app",
   "version": "1.0.0",
-  "description": "A mobile-friendly, intuitive to-do list app that feels like home",
+  "description": "Done! ⚡ - A lightning-fast, intuitive to-do list app that makes you feel unstoppable. Productivity at your fingertips.",
   "private": true,
   "scripts": {
     "dev": "next dev",

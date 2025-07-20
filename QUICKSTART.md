@@ -1,6 +1,6 @@
 # Quick Start Guide 🚀
 
-Get your Soulful To-Do app running in under 2 minutes!
+Get your Done! ⚡ app running in under 2 minutes!
 
 ## Prerequisites
 - Node.js 18+ installed on your system
@@ -34,7 +34,7 @@ npm run dev
 2. **Open your browser:**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
-3. **Start organizing!** 🌿
+3. **Start organizing!** ⚡
 
 ## Quick Tips
 
