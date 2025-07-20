@@ -10,17 +10,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Framer Motion CDN -->
-    <script src="https://unpkg.com/framer-motion@10.16.0/dist/framer-motion.js"></script>
-    
-    <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    
-    <!-- date-fns CDN -->
-    <script src="https://unpkg.com/date-fns@2.30.0/index.js"></script>
-    
     <style>
-        /* Custom styles and animations */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         * {
@@ -41,10 +31,6 @@
             @apply opacity-60 line-through;
         }
         
-        .task-item-dragging {
-            @apply z-20 shadow-lg scale-105 rotate-2;
-        }
-        
         .tab-button {
             @apply flex flex-col items-center px-2 pt-1 pb-0.5 border-b-2 transition-all duration-200;
         }
@@ -55,14 +41,6 @@
         
         .tab-button-inactive {
             @apply text-gray-400 border-transparent hover:text-gray-600;
-        }
-        
-        .input-field {
-            @apply flex-1 px-4 py-3 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-lg bg-blue-50 placeholder-gray-400;
-        }
-        
-        .primary-button {
-            @apply bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-xl font-semibold text-lg transition-colors;
         }
         
         .priority-btn {
@@ -107,50 +85,16 @@
             100% { transform: scale(1); opacity: 1; }
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .modal-enter {
+            animation: slideIn 0.3s ease-out;
         }
         
-        @keyframes scaleIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .modal-exit {
+            animation: slideOut 0.3s ease-in;
         }
         
-        .animate-slide-in { animation: slideIn 0.3s ease-out; }
-        .animate-slide-out { animation: slideOut 0.3s ease-in; }
-        .animate-bounce-in { animation: bounceIn 0.5s ease-out; }
-        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
-        .animate-scale-in { animation: scaleIn 0.2s ease-out; }
-        
-        /* Custom colors */
-        .bg-soulful-50 { background-color: #f0fdf4; }
-        .bg-soulful-100 { background-color: #dcfce7; }
-        .bg-soulful-200 { background-color: #bbf7d0; }
-        .bg-soulful-300 { background-color: #86efac; }
-        .bg-soulful-400 { background-color: #4ade80; }
-        .bg-soulful-500 { background-color: #22c55e; }
-        .bg-soulful-600 { background-color: #16a34a; }
-        .bg-soulful-700 { background-color: #15803d; }
-        
-        .text-soulful-400 { color: #4ade80; }
-        .text-soulful-500 { color: #22c55e; }
-        .text-soulful-600 { color: #16a34a; }
-        .text-soulful-700 { color: #15803d; }
-        
-        .border-soulful-200 { border-color: #bbf7d0; }
-        .border-soulful-500 { border-color: #22c55e; }
-        
-        .focus\:ring-soulful-200:focus { --tw-ring-color: #bbf7d0; }
-        
-        /* Hide scrollbars */
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
         }
         
         /* Mobile-specific improvements */
@@ -191,7 +135,6 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span id="taskCount" class="text-sm text-gray-500">0 tasks</span>
-                        <button id="clearFiltersBtn" class="text-xs text-blue-600 hover:text-blue-700 hidden">Clear filters</button>
                     </div>
                 </div>
             </div>
@@ -246,86 +189,117 @@
         </nav>
 
         <!-- Add Task Modal -->
-    <div id="addTaskModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20 hidden p-4">
-        <div class="modal-content w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
-            <form id="addTaskForm" class="space-y-4">
-                <input id="taskText" class="input-field" placeholder="What's on your mind?" required>
-                
-                <div class="flex gap-2">
-                    <button type="button" data-priority="low" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
-                        🟢 Low
-                    </button>
-                    <button type="button" data-priority="medium" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 transition-colors">
-                        🟡 Medium
-                    </button>
-                    <button type="button" data-priority="high" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
-                        🔴 High
-                    </button>
+        <div id="addTaskModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+            <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Task</h3>
+                    
+                    <form id="addTaskForm">
+                        <div class="space-y-4">
+                            <!-- Task Title -->
+                            <div>
+                                <label for="taskText" class="block text-sm font-medium text-gray-700 mb-2">Task Title</label>
+                                <input type="text" id="taskText" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-lg" placeholder="What needs to be done?" required>
+                            </div>
+                            
+                            <!-- Priority Selection -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                                <div class="flex gap-2">
+                                    <button type="button" data-priority="low" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
+                                        🟢 Low
+                                    </button>
+                                    <button type="button" data-priority="medium" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-yellow-500 bg-yellow-50 text-yellow-700 transition-colors">
+                                        🟡 Medium
+                                    </button>
+                                    <button type="button" data-priority="high" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
+                                        🔴 High
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Notes -->
+                            <div>
+                                <label for="taskNotes" class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+                                <textarea id="taskNotes" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-lg resize-none" rows="3" placeholder="Add any additional details..."></textarea>
+                            </div>
+                            
+                            <!-- Due Date -->
+                            <div>
+                                <label for="taskDueDate" class="block text-sm font-medium text-gray-700 mb-2">Due Date (optional)</label>
+                                <input type="date" id="taskDueDate" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-lg">
+                            </div>
+                            
+                            <!-- Tags -->
+                            <div>
+                                <label for="taskTags" class="block text-sm font-medium text-gray-700 mb-2">Tags (optional)</label>
+                                <input type="text" id="taskTags" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 text-lg" placeholder="work, urgent, project (comma separated)">
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2 mt-6">
+                            <button type="button" id="cancelAddBtn" class="flex-1 py-3 px-4 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" id="submitAddBtn" class="flex-1 py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg transition-colors">
+                                Add Task
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                
-                <input id="taskDueDate" type="date" class="input-field">
-                <textarea id="taskNotes" class="input-field resize-none" placeholder="Notes (optional)" rows="2"></textarea>
-                <input id="taskTags" class="input-field" placeholder="Tags (comma separated)">
-                
-                <div class="flex gap-2 mt-6">
-                    <button type="button" id="cancelAddBtn" class="flex-1 py-3 px-4 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" id="submitAddBtn" class="flex-1 py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg transition-colors">
-                        Add Task
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Statistics Modal -->
-    <div id="statsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20 hidden p-4">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-semibold text-gray-800">Statistics</h3>
-                <button id="closeStatsBtn" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
-            
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center p-4 bg-blue-50 rounded-xl">
-                        <div id="totalTasks" class="text-2xl font-bold text-blue-600">0</div>
-                        <div class="text-sm text-gray-600">Total Tasks</div>
+        </div>
+
+        <!-- Statistics Modal -->
+        <div id="statsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Your Progress</h3>
+                        <button id="closeStatsBtn" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="text-center p-4 bg-green-50 rounded-xl">
-                        <div id="completedTasks" class="text-2xl font-bold text-green-600">0</div>
-                        <div class="text-sm text-gray-600">Completed</div>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center p-4 bg-yellow-50 rounded-xl">
-                        <div id="pendingTasks" class="text-2xl font-bold text-yellow-600">0</div>
-                        <div class="text-sm text-gray-600">Pending</div>
-                    </div>
-                    <div class="text-center p-4 bg-red-50 rounded-xl">
-                        <div id="overdueTasks" class="text-2xl font-bold text-red-600">0</div>
-                        <div class="text-sm text-gray-600">Overdue</div>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700">Completion Rate</span>
-                        <span id="completionRate" class="text-sm font-bold text-blue-600">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div id="completionBar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-                </div>
-                
-                <div id="highPriorityAlert" class="bg-orange-50 rounded-xl p-4 hidden">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                        </svg>
-                        <span id="highPriorityText" class="text-sm font-medium text-gray-700">0 high priority tasks pending</span>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-blue-600" id="totalTasks">0</div>
+                                <div class="text-sm text-blue-500">Total Tasks</div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-green-600" id="completedTasks">0</div>
+                                <div class="text-sm text-green-500">Completed</div>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-yellow-600" id="pendingTasks">0</div>
+                                <div class="text-sm text-yellow-500">Pending</div>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-xl">
+                                <div class="text-2xl font-bold text-red-600" id="overdueTasks">0</div>
+                                <div class="text-sm text-red-500">Overdue</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium text-gray-700">Completion Rate</span>
+                                <span class="text-sm font-medium text-gray-700" id="completionRate">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" id="completionBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="highPriorityAlert" class="bg-red-50 border border-red-200 p-4 rounded-xl hidden">
+                            <div class="flex items-center gap-2">
+                                <span class="text-red-500">⚠️</span>
+                                <span class="text-sm font-medium text-red-700" id="highPriorityText"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -333,59 +307,10 @@
     </div>
 
     <script>
-        // Demo data
-        const demoData = {
-            work: [
-                {
-                    id: 1,
-                    text: "Complete project proposal",
-                    completed: false,
-                    priority: "high",
-                    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-                    createdAt: new Date(),
-                    notes: "Need to include budget and timeline",
-                    tags: ["project", "proposal"]
-                },
-                {
-                    id: 2,
-                    text: "Review team performance",
-                    completed: true,
-                    priority: "medium",
-                    dueDate: null,
-                    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-                    notes: "Monthly review meeting",
-                    tags: ["review", "team"]
-                }
-            ],
-            personal: [
-                {
-                    id: 3,
-                    text: "Call mom",
-                    completed: false,
-                    priority: "high",
-                    dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
-                    createdAt: new Date(),
-                    notes: "Check on her health",
-                    tags: ["family", "health"]
-                }
-            ],
-            groceries: [
-                {
-                    id: 4,
-                    text: "Buy groceries",
-                    completed: false,
-                    priority: "medium",
-                    dueDate: new Date(Date.now() + 12 * 60 * 60 * 1000),
-                    createdAt: new Date(),
-                    notes: "Milk, bread, eggs, vegetables",
-                    tags: ["food", "shopping"]
-                }
-            ]
-        };
-
-        class DoneApp {
+        // Context Engineering: State Management
+        class TaskState {
             constructor() {
-                this.tasks = JSON.parse(localStorage.getItem('doneTasks')) || demoData;
+                this.tasks = this.loadFromStorage();
                 this.activeTab = 'work';
                 this.tabs = [
                     { key: 'work', label: 'Work', icon: '💼' },
@@ -396,53 +321,169 @@
                     { key: 'learning', label: 'Learning', icon: '📚' },
                     { key: 'someday', label: 'Someday', icon: '🌈' }
                 ];
+            }
+
+            // Context Strategy 1: Writing Context - Persistent Storage
+            loadFromStorage() {
+                const stored = localStorage.getItem('doneTasks');
+                if (stored) {
+                    return JSON.parse(stored);
+                }
                 
-                this.init();
+                // Demo data for first-time users
+                return {
+                    work: [
+                        {
+                            id: 1,
+                            text: "Complete project proposal",
+                            completed: false,
+                            priority: "high",
+                            dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+                            createdAt: new Date(),
+                            notes: "Include budget and timeline",
+                            tags: ["work", "urgent"]
+                        }
+                    ],
+                    personal: [
+                        {
+                            id: 2,
+                            text: "Call mom",
+                            completed: false,
+                            priority: "high",
+                            dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                            createdAt: new Date(),
+                            notes: "Check on her health",
+                            tags: ["family", "health"]
+                        }
+                    ],
+                    groceries: [
+                        {
+                            id: 3,
+                            text: "Buy groceries",
+                            completed: false,
+                            priority: "medium",
+                            dueDate: new Date(Date.now() + 12 * 60 * 60 * 1000),
+                            createdAt: new Date(),
+                            notes: "Milk, bread, eggs, vegetables",
+                            tags: ["food", "shopping"]
+                        }
+                    ]
+                };
             }
-            
-            init() {
+
+            saveToStorage() {
+                localStorage.setItem('doneTasks', JSON.stringify(this.tasks));
+            }
+
+            // Context Strategy 2: Selecting Context - Dynamic Retrieval
+            getTasksForTab(tabKey) {
+                return this.tasks[tabKey] || [];
+            }
+
+            getTaskById(taskId) {
+                const allTasks = Object.values(this.tasks).flat();
+                return allTasks.find(task => task.id === taskId);
+            }
+
+            // Context Strategy 3: Compressing Context - Efficient Updates
+            updateTask(taskId, updates) {
+                const task = this.getTaskById(taskId);
+                if (task) {
+                    Object.assign(task, updates);
+                    this.saveToStorage();
+                    return true;
+                }
+                return false;
+            }
+
+            deleteTask(taskId) {
+                const tabKey = this.activeTab;
+                this.tasks[tabKey] = this.tasks[tabKey].filter(task => task.id !== taskId);
+                this.saveToStorage();
+            }
+
+            addTask(task) {
+                if (!this.tasks[this.activeTab]) {
+                    this.tasks[this.activeTab] = [];
+                }
+                this.tasks[this.activeTab].unshift(task);
+                this.saveToStorage();
+            }
+
+            // Context Strategy 4: Isolating Context - Tab Management
+            switchTab(tabKey) {
+                this.activeTab = tabKey;
+            }
+
+            getStats() {
+                const allTasks = Object.values(this.tasks).flat();
+                const totalTasks = allTasks.length;
+                const completedTasks = allTasks.filter(task => task.completed).length;
+                const pendingTasks = totalTasks - completedTasks;
+                const overdueTasks = allTasks.filter(task => 
+                    task.dueDate && new Date(task.dueDate) < new Date() && !task.completed
+                ).length;
+                const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                const highPriorityTasks = allTasks.filter(task => task.priority === 'high' && !task.completed);
+
+                return {
+                    totalTasks,
+                    completedTasks,
+                    pendingTasks,
+                    overdueTasks,
+                    completionRate,
+                    highPriorityTasks
+                };
+            }
+        }
+
+        // UI Controller - Clean Architecture
+        class TaskUI {
+            constructor(state) {
+                this.state = state;
                 this.setupEventListeners();
-                this.switchTab(this.activeTab);
-                this.updateStats();
+                this.initializeUI();
             }
-            
+
             setupEventListeners() {
                 // Tab switching
                 document.querySelectorAll('[data-tab]').forEach(btn => {
                     btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
                 });
-                
+
                 // Add task button
                 document.getElementById('addTaskBtn').addEventListener('click', () => this.showAddModal());
-                
+
                 // Modal controls
                 document.getElementById('cancelAddBtn').addEventListener('click', () => this.hideAddModal());
                 document.getElementById('addTaskForm').addEventListener('submit', (e) => this.handleAddTask(e));
-                
-                // Clear filters
-                document.getElementById('clearFiltersBtn').addEventListener('click', () => this.clearFilters());
-                
-                // Priority buttons in add modal
+
+                // Priority buttons
                 document.querySelectorAll('.priority-btn').forEach(btn => {
                     btn.addEventListener('click', () => this.setPriorityInModal(btn.dataset.priority));
                 });
-                
+
                 // Statistics
                 document.getElementById('statsBtn').addEventListener('click', () => this.showStats());
                 document.getElementById('closeStatsBtn').addEventListener('click', () => this.hideStats());
-                
+
                 // Modal backdrop clicks
                 document.getElementById('addTaskModal').addEventListener('click', (e) => {
                     if (e.target === e.currentTarget) this.hideAddModal();
                 });
-                
+
                 document.getElementById('statsModal').addEventListener('click', (e) => {
                     if (e.target === e.currentTarget) this.hideStats();
                 });
             }
-            
+
+            initializeUI() {
+                this.switchTab(this.state.activeTab);
+                this.updateStats();
+            }
+
             switchTab(tabKey) {
-                this.activeTab = tabKey;
+                this.state.switchTab(tabKey);
                 
                 // Update tab buttons
                 document.querySelectorAll('[data-tab]').forEach(btn => {
@@ -453,85 +494,18 @@
                 document.querySelector(`[data-tab="${tabKey}"]`).classList.remove('tab-button-inactive');
                 
                 // Update header
-                const tabInfo = this.tabs.find(t => t.key === tabKey);
+                const tabInfo = this.state.tabs.find(t => t.key === tabKey);
                 document.getElementById('tabIcon').textContent = tabInfo.icon;
                 document.getElementById('tabLabel').textContent = tabInfo.label;
                 
                 this.renderTasks();
                 this.updateTaskCount();
             }
-            
-            showAddModal() {
-                document.getElementById('addTaskModal').classList.remove('hidden');
-                document.getElementById('taskText').focus();
-            }
-            
-            hideAddModal() {
-                document.getElementById('addTaskModal').classList.add('hidden');
-                document.getElementById('addTaskForm').reset();
-                this.resetPriorityButtons();
-            }
-            
-            handleAddTask(e) {
-                e.preventDefault();
-                
-                const text = document.getElementById('taskText').value.trim();
-                if (!text) return;
-                
-                const priority = document.querySelector('.priority-btn.selected').dataset.priority;
-                const dueDate = document.getElementById('taskDueDate').value;
-                const notes = document.getElementById('taskNotes').value.trim();
-                const tags = document.getElementById('taskTags').value.split(',').map(t => t.trim()).filter(Boolean);
-                
-                const task = {
-                    id: this.generateId(),
-                    text,
-                    completed: false,
-                    priority,
-                    dueDate: dueDate ? new Date(dueDate) : null,
-                    createdAt: new Date(),
-                    notes: notes || null,
-                    tags
-                };
-                
-                if (!this.tasks[this.activeTab]) {
-                    this.tasks[this.activeTab] = [];
-                }
-                
-                this.tasks[this.activeTab].unshift(task);
-                this.saveTasks();
-                this.renderTasks();
-                this.updateTaskCount();
-                this.hideAddModal();
-            }
-            
-            setPriorityInModal(priority) {
-                document.querySelectorAll('.priority-btn').forEach(btn => {
-                    btn.classList.remove('selected', 'border-green-500', 'bg-green-50', 'text-green-700', 'border-yellow-500', 'bg-yellow-50', 'text-yellow-700', 'border-red-500', 'bg-red-50', 'text-red-700');
-                    btn.classList.add('border-gray-200', 'text-gray-600');
-                });
-                
-                const selectedBtn = document.querySelector(`[data-priority="${priority}"]`);
-                selectedBtn.classList.add('selected');
-                selectedBtn.classList.remove('border-gray-200', 'text-gray-600');
-            }
-            
-            resetPriorityButtons() {
-                document.querySelectorAll('.priority-btn').forEach(btn => {
-                    btn.classList.remove('selected', 'border-green-500', 'bg-green-50', 'text-green-700', 'border-yellow-500', 'bg-yellow-50', 'text-yellow-700', 'border-red-500', 'bg-red-50', 'text-red-700');
-                    btn.classList.add('border-gray-200', 'text-gray-600');
-                });
-                
-                // Set medium as default
-                const mediumBtn = document.querySelector('[data-priority="medium"]');
-                mediumBtn.classList.add('selected');
-                mediumBtn.classList.remove('border-gray-200', 'text-gray-600');
-            }
-            
+
             renderTasks() {
                 const taskList = document.getElementById('taskList');
                 const emptyState = document.getElementById('emptyState');
-                const tasks = this.tasks[this.activeTab] || [];
+                const tasks = this.state.getTasksForTab(this.state.activeTab);
                 
                 if (tasks.length === 0) {
                     taskList.innerHTML = '';
@@ -561,7 +535,7 @@
                     });
                 });
             }
-            
+
             renderTask(task) {
                 const priorityColors = {
                     low: 'text-green-600 bg-green-50',
@@ -604,69 +578,114 @@
                     </div>
                 `;
             }
-            
+
             toggleTask(taskId) {
-                const task = this.tasks[this.activeTab].find(t => t.id === taskId);
+                const task = this.state.getTaskById(taskId);
                 if (task) {
-                    task.completed = !task.completed;
-                    this.saveTasks();
+                    this.state.updateTask(taskId, { completed: !task.completed });
                     this.renderTasks();
                     this.updateTaskCount();
                     this.updateStats();
                 }
             }
-            
+
             deleteTask(taskId) {
-                console.log('Deleting task with ID:', taskId);
-                console.log('Current tasks:', this.tasks[this.activeTab]);
-                
-                this.tasks[this.activeTab] = this.tasks[this.activeTab].filter(t => t.id !== taskId);
-                
-                console.log('Tasks after deletion:', this.tasks[this.activeTab]);
-                
-                this.saveTasks();
+                this.state.deleteTask(taskId);
                 this.renderTasks();
                 this.updateTaskCount();
                 this.updateStats();
             }
-            
+
             updateTaskCount() {
-                const tasks = this.tasks[this.activeTab] || [];
+                const tasks = this.state.getTasksForTab(this.state.activeTab);
                 const count = tasks.length;
                 document.getElementById('taskCount').textContent = `${count} task${count !== 1 ? 's' : ''}`;
             }
-            
+
             updateStats() {
-                const allTasks = Object.values(this.tasks).flat();
-                const totalTasks = allTasks.length;
-                const completedTasks = allTasks.filter(t => t.completed).length;
-                const pendingTasks = totalTasks - completedTasks;
-                const overdueTasks = allTasks.filter(t => 
-                    t.dueDate && new Date(t.dueDate) < new Date() && !t.completed
-                ).length;
+                const stats = this.state.getStats();
                 
-                const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                
-                document.getElementById('totalTasks').textContent = totalTasks;
-                document.getElementById('completedTasks').textContent = completedTasks;
-                document.getElementById('pendingTasks').textContent = pendingTasks;
-                document.getElementById('overdueTasks').textContent = overdueTasks;
-                document.getElementById('completionRate').textContent = `${completionRate}%`;
-                document.getElementById('completionBar').style.width = `${completionRate}%`;
+                document.getElementById('totalTasks').textContent = stats.totalTasks;
+                document.getElementById('completedTasks').textContent = stats.completedTasks;
+                document.getElementById('pendingTasks').textContent = stats.pendingTasks;
+                document.getElementById('overdueTasks').textContent = stats.overdueTasks;
+                document.getElementById('completionRate').textContent = `${stats.completionRate}%`;
+                document.getElementById('completionBar').style.width = `${stats.completionRate}%`;
                 
                 // High priority alert
-                const highPriorityTasks = allTasks.filter(t => t.priority === 'high' && !t.completed);
                 const highPriorityAlert = document.getElementById('highPriorityAlert');
                 const highPriorityText = document.getElementById('highPriorityText');
                 
-                if (highPriorityTasks.length > 0) {
+                if (stats.highPriorityTasks.length > 0) {
                     highPriorityAlert.classList.remove('hidden');
-                    highPriorityText.textContent = `${highPriorityTasks.length} high priority task${highPriorityTasks.length !== 1 ? 's' : ''} pending`;
+                    highPriorityText.textContent = `${stats.highPriorityTasks.length} high priority task${stats.highPriorityTasks.length !== 1 ? 's' : ''} pending`;
                 } else {
                     highPriorityAlert.classList.add('hidden');
                 }
             }
-            
+
+            showAddModal() {
+                document.getElementById('addTaskModal').classList.remove('hidden');
+                document.getElementById('taskText').focus();
+                this.resetPriorityButtons();
+            }
+
+            hideAddModal() {
+                document.getElementById('addTaskModal').classList.add('hidden');
+                document.getElementById('addTaskForm').reset();
+            }
+
+            handleAddTask(e) {
+                e.preventDefault();
+                
+                const text = document.getElementById('taskText').value.trim();
+                if (!text) return;
+                
+                const priority = document.querySelector('.priority-btn.selected').dataset.priority;
+                const dueDate = document.getElementById('taskDueDate').value;
+                const notes = document.getElementById('taskNotes').value.trim();
+                const tags = document.getElementById('taskTags').value.split(',').map(t => t.trim()).filter(Boolean);
+                
+                const task = {
+                    id: Math.floor(Date.now() + Math.random() * 1000),
+                    text,
+                    completed: false,
+                    priority,
+                    dueDate: dueDate ? new Date(dueDate) : null,
+                    createdAt: new Date(),
+                    notes: notes || null,
+                    tags
+                };
+                
+                this.state.addTask(task);
+                this.renderTasks();
+                this.updateTaskCount();
+                this.hideAddModal();
+            }
+
+            setPriorityInModal(priority) {
+                document.querySelectorAll('.priority-btn').forEach(btn => {
+                    btn.classList.remove('selected', 'border-green-500', 'bg-green-50', 'text-green-700', 'border-yellow-500', 'bg-yellow-50', 'text-yellow-700', 'border-red-500', 'bg-red-50', 'text-red-700');
+                    btn.classList.add('border-gray-200', 'text-gray-600');
+                });
+                
+                const selectedBtn = document.querySelector(`[data-priority="${priority}"]`);
+                selectedBtn.classList.add('selected');
+                selectedBtn.classList.remove('border-gray-200', 'text-gray-600');
+            }
+
+            resetPriorityButtons() {
+                document.querySelectorAll('.priority-btn').forEach(btn => {
+                    btn.classList.remove('selected', 'border-green-500', 'bg-green-50', 'text-green-700', 'border-yellow-500', 'bg-yellow-50', 'text-yellow-700', 'border-red-500', 'bg-red-50', 'text-red-700');
+                    btn.classList.add('border-gray-200', 'text-gray-600');
+                });
+                
+                // Set medium as default
+                const mediumBtn = document.querySelector('[data-priority="medium"]');
+                mediumBtn.classList.add('selected');
+                mediumBtn.classList.remove('border-gray-200', 'text-gray-600');
+            }
+
             formatDueDate(date) {
                 const now = new Date();
                 const dueDate = new Date(date);
@@ -685,32 +704,20 @@
                     return dueDate.toLocaleDateString();
                 }
             }
-            
+
             showStats() {
                 document.getElementById('statsModal').classList.remove('hidden');
             }
-            
+
             hideStats() {
                 document.getElementById('statsModal').classList.add('hidden');
             }
-            
-            clearFilters() {
-                // Reset any active filters
-                document.getElementById('clearFiltersBtn').classList.add('hidden');
-            }
-            
-            generateId() {
-                return Math.floor(Date.now() + Math.random() * 1000);
-            }
-            
-            saveTasks() {
-                localStorage.setItem('doneTasks', JSON.stringify(this.tasks));
-            }
         }
-        
-        // Initialize the app
+
+        // Initialize the app with clean architecture
         document.addEventListener('DOMContentLoaded', () => {
-            new DoneApp();
+            const state = new TaskState();
+            const ui = new TaskUI(state);
         });
     </script>
 </body>
