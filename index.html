@@ -140,11 +140,15 @@
                     <h1 class="text-3xl font-bold text-blue-700 tracking-tight">Done! ⚡</h1>
                     <p class="text-blue-400 text-base font-medium">Productivity at your fingertips 🚀</p>
                 </div>
-                <button id="statsBtn" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" aria-label="View statistics">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <div id="saveIndicator" class="text-xs text-green-600 hidden">✓ Saved</div>
+                    <button id="clearDataBtn" class="text-xs text-red-600 hover:text-red-700" title="Clear all data (debug)">🗑️</button>
+                    <button id="statsBtn" class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" aria-label="View statistics">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -414,7 +418,21 @@
             loadFromStorage() {
                 const stored = localStorage.getItem('doneTasks');
                 if (stored) {
-                    return JSON.parse(stored);
+                    const parsed = JSON.parse(stored);
+                    // Convert date strings back to Date objects
+                    Object.values(parsed).forEach(tabTasks => {
+                        if (Array.isArray(tabTasks)) {
+                            tabTasks.forEach(task => {
+                                if (task.dueDate) {
+                                    task.dueDate = new Date(task.dueDate);
+                                }
+                                if (task.createdAt) {
+                                    task.createdAt = new Date(task.createdAt);
+                                }
+                            });
+                        }
+                    });
+                    return parsed;
                 }
                 
                 // Demo data for first-time users
@@ -459,7 +477,33 @@
             }
 
             saveToStorage() {
-                localStorage.setItem('doneTasks', JSON.stringify(this.tasks));
+                // Create a copy of tasks with dates converted to strings for JSON serialization
+                const tasksToSave = {};
+                Object.keys(this.tasks).forEach(tabKey => {
+                    tasksToSave[tabKey] = this.tasks[tabKey].map(task => ({
+                        ...task,
+                        dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+                        createdAt: task.createdAt ? task.createdAt.toISOString() : null
+                    }));
+                });
+                localStorage.setItem('doneTasks', JSON.stringify(tasksToSave));
+                
+                // Show save indicator
+                this.showSaveIndicator();
+            }
+            
+            showSaveIndicator() {
+                const indicator = document.getElementById('saveIndicator');
+                indicator.classList.remove('hidden');
+                setTimeout(() => {
+                    indicator.classList.add('hidden');
+                }, 2000);
+            }
+            
+            clearAllData() {
+                localStorage.removeItem('doneTasks');
+                this.tasks = this.loadFromStorage(); // Reload demo data
+                this.showSaveIndicator();
             }
 
             // Context Strategy 2: Selecting Context - Dynamic Retrieval
@@ -562,6 +606,16 @@
                 // Statistics
                 document.getElementById('statsBtn').addEventListener('click', () => this.showStats());
                 document.getElementById('closeStatsBtn').addEventListener('click', () => this.hideStats());
+                
+                // Clear data (debug)
+                document.getElementById('clearDataBtn').addEventListener('click', () => {
+                    if (confirm('Clear all data and reset to demo tasks?')) {
+                        this.state.clearAllData();
+                        this.renderTasks();
+                        this.updateTaskCount();
+                        this.updateStats();
+                    }
+                });
 
                 // Modal backdrop clicks
                 document.getElementById('addTaskModal').addEventListener('click', (e) => {
