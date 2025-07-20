@@ -69,6 +69,18 @@
             @apply bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-xl font-semibold text-lg transition-colors;
         }
         
+        .priority-btn {
+            @apply transition-all duration-200;
+        }
+        
+        .priority-btn:hover {
+            @apply transform scale-105;
+        }
+        
+        .priority-btn.selected {
+            @apply border-blue-500 bg-blue-50 text-blue-700 shadow-md;
+        }
+        
         /* Custom animations */
         @keyframes slideIn {
             from { transform: translateY(100%); opacity: 0; }
@@ -243,13 +255,13 @@
                 <input id="taskText" class="input-field" placeholder="What's on your mind?" required>
                 
                 <div class="flex gap-2">
-                    <button type="button" data-priority="low" class="priority-btn flex-1 py-2 px-3 rounded-lg border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
+                    <button type="button" data-priority="low" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
                         🟢 Low
                     </button>
-                    <button type="button" data-priority="medium" class="priority-btn flex-1 py-2 px-3 rounded-lg border border-blue-500 bg-blue-50 text-blue-700 transition-colors">
+                    <button type="button" data-priority="medium" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-blue-500 bg-blue-50 text-blue-700 transition-colors">
                         🟡 Medium
                     </button>
-                    <button type="button" data-priority="high" class="priority-btn flex-1 py-2 px-3 rounded-lg border border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
+                    <button type="button" data-priority="high" class="priority-btn flex-1 py-2 px-3 rounded-lg border-2 border-gray-200 text-gray-600 hover:border-gray-300 transition-colors">
                         🔴 High
                     </button>
                 </div>
@@ -259,10 +271,10 @@
                 <input id="taskTags" class="input-field" placeholder="Tags (comma separated)">
                 
                 <div class="flex gap-2 mt-6">
-                    <button type="button" id="cancelAddBtn" class="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
+                    <button type="button" id="cancelAddBtn" class="flex-1 py-3 px-4 rounded-xl border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors">
                         Cancel
                     </button>
-                    <button type="submit" id="submitAddBtn" class="primary-button flex-1">
+                    <button type="submit" id="submitAddBtn" class="flex-1 py-3 px-4 rounded-xl border-2 border-blue-500 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-lg transition-colors">
                         Add Task
                     </button>
                 </div>
@@ -469,7 +481,7 @@
                 const text = document.getElementById('taskText').value.trim();
                 if (!text) return;
                 
-                const priority = document.querySelector('.priority-btn.border-blue-500').dataset.priority;
+                const priority = document.querySelector('.priority-btn.selected').dataset.priority;
                 const dueDate = document.getElementById('taskDueDate').value;
                 const notes = document.getElementById('taskNotes').value.trim();
                 const tags = document.getElementById('taskTags').value.split(',').map(t => t.trim()).filter(Boolean);
@@ -498,25 +510,21 @@
             
             setPriorityInModal(priority) {
                 document.querySelectorAll('.priority-btn').forEach(btn => {
-                    btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
-                    btn.classList.add('border-gray-200', 'text-gray-600');
+                    btn.classList.remove('selected');
                 });
                 
                 const selectedBtn = document.querySelector(`[data-priority="${priority}"]`);
-                selectedBtn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
-                selectedBtn.classList.remove('border-gray-200', 'text-gray-600');
+                selectedBtn.classList.add('selected');
             }
             
             resetPriorityButtons() {
                 document.querySelectorAll('.priority-btn').forEach(btn => {
-                    btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
-                    btn.classList.add('border-gray-200', 'text-gray-600');
+                    btn.classList.remove('selected');
                 });
                 
                 // Set medium as default
                 const mediumBtn = document.querySelector('[data-priority="medium"]');
-                mediumBtn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
-                mediumBtn.classList.remove('border-gray-200', 'text-gray-600');
+                mediumBtn.classList.add('selected');
             }
             
             renderTasks() {
